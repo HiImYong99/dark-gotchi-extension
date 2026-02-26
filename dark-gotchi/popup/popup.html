@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dark-gotchi</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Dark-gotchi</h1>
+    <div id="status-container">
+      <img id="pet-display" src="../assets/pets/normal.svg" alt="Pet State">
+      <p id="state-text">State: NORMAL</p>
+    </div>
+    <div class="stats">
+      <p>Distraction Time: <span id="distraction-time">0</span> min</p>
+    </div>
+
+    <div class="license-section">
+      <input type="text" id="license-input" placeholder="License Key">
+      <button id="activate-btn">Activate Pro</button>
+      <p id="license-msg"></p>
+    </div>
+  </div>
+  <script src="popup.js" type="module"></script>
+</body>
+</html>
