@@ -1,6 +1,10 @@
 // content/content.js
 
 const HOST_ID = 'dark-gotchi-host';
+let currentSettings = {
+    selected_skin: 'white_blob',
+    custom_insults: []
+};
 
 async function init() {
   // Check if host already exists
@@ -23,14 +27,44 @@ async function init() {
   link.href = chrome.runtime.getURL('content/styles.css');
   shadow.appendChild(link);
 
-  // Initial Render
-  const result = await chrome.storage.local.get(['user_stats']);
+  // Initial Fetch
+  const result = await chrome.storage.local.get(['user_stats', 'settings']);
+  if (result.settings) {
+      currentSettings = result.settings;
+  }
   renderPet(container, result.user_stats);
 
   // Listen for storage changes
   chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local' && changes.user_stats) {
-      renderPet(container, changes.user_stats.newValue);
+    if (area === 'local') {
+      let needsRender = false;
+      let newStats = null;
+
+      if (changes.settings) {
+          currentSettings = changes.settings.newValue;
+          needsRender = true;
+      }
+
+      if (changes.user_stats) {
+          newStats = changes.user_stats.newValue;
+          needsRender = true;
+      } else {
+          // If only settings changed, we need current stats to re-render
+          // But we don't have them easily unless we store them or re-fetch.
+          // For simplicity, let's re-fetch if only settings changed,
+          // or just rely on the fact that usually stats update frequently.
+          // Better: fetch stats if not provided.
+      }
+
+      if (needsRender) {
+          if (newStats) {
+              renderPet(container, newStats);
+          } else {
+              chrome.storage.local.get('user_stats', (res) => {
+                  if (res.user_stats) renderPet(container, res.user_stats);
+              });
+          }
+      }
     }
   });
 
@@ -48,10 +82,8 @@ function renderPet(container, stats) {
   if (!stats) return;
 
   const state = stats.current_state || 'NORMAL';
+  const skin = currentSettings.selected_skin || 'white_blob';
 
-  // Clear container content (except the link which is outside container in shadow root, wait...
-  // container is child of shadow. link is child of shadow.
-  // renderPet clears container. That's fine.)
   container.innerHTML = '';
 
   // Speech Bubble
@@ -63,61 +95,75 @@ function renderPet(container, stats) {
   const img = document.createElement('img');
   img.className = 'pet-image';
 
-  // Determine image source based on state
-  let imgSrc = 'assets/pets/normal.svg'; // Default
+  // Determine image source based on state and skin
+  // Construct path: assets/pets/{skin}/{state}.svg
+  // Ensure state is lowercase
+  let fileName = state.toLowerCase() + '.svg';
+  let imgSrc = `assets/pets/${skin}/${fileName}`;
+
   let messageText = "Hi!";
   let extraClass = "";
 
+  // Helper for insults
+  const getInsult = (defaultMsg) => {
+      if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
+          const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
+          return currentSettings.custom_insults[idx];
+      }
+      return defaultMsg;
+  };
+
   switch (state) {
     case 'FAT':
-      imgSrc = 'assets/pets/fat.svg';
-      messageText = "Popcorn!";
+      messageText = getInsult("Popcorn!");
       extraClass = 'state-fat';
       break;
     case 'ARROGANT':
-      imgSrc = 'assets/pets/arrogant.svg';
-      messageText = "Get a life";
+      messageText = getInsult("Get a life");
       extraClass = 'state-arrogant';
       break;
     case 'BEGGAR':
-      imgSrc = 'assets/pets/beggar.svg';
-      messageText = "Check balance?";
+      messageText = getInsult("Check balance?");
       extraClass = 'state-beggar';
       break;
     case 'NORMAL':
     default:
-      imgSrc = 'assets/pets/normal.svg';
       messageText = "Hi!";
       break;
   }
 
   img.src = chrome.runtime.getURL(imgSrc);
 
-  // Handle image load error (placeholder)
   img.onerror = () => {
-      img.src = ""; // Clear source to avoid loop
-      img.style.backgroundColor = "magenta"; // 16x16 placeholder color
+      // Fallback if skin/file missing
+      console.warn(`Image failed to load: ${imgSrc}`);
+      img.src = "";
+      img.style.backgroundColor = "magenta";
       img.style.width = "16px";
       img.style.height = "16px";
       img.style.display = "block";
   };
 
-  // Apply state class to container for CSS rules
   if (extraClass) {
       container.className = extraClass;
   } else {
       container.className = '';
   }
 
-  // Animation for NORMAL state (Exercise motion)
   if (state === 'NORMAL') {
       img.classList.add('anim-bounce');
   }
 
   container.appendChild(img);
 
-  // Show message on hover or click
   container.onclick = () => {
+    // If customized, maybe pick another random one on click?
+    // For now, keep the one decided at render time or re-pick?
+    // Let's re-pick if bad state
+    if (state !== 'NORMAL' && currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
+         messageText = getInsult(messageText);
+    }
+
     bubble.textContent = messageText;
     bubble.classList.add('visible');
     setTimeout(() => {
@@ -126,5 +172,4 @@ function renderPet(container, stats) {
   };
 }
 
-// Start
 init();
