@@ -1,34 +1,21 @@
-// content/content.js
-
 const HOST_ID = 'dark-gotchi-host';
 let currentSettings = {
     selected_skin: 'white_blob',
     custom_insults: []
 };
 let currentStats = null;
-
 async function init() {
-  // Check if host already exists
   if (document.getElementById(HOST_ID)) return;
-
   const host = document.createElement('div');
   host.id = HOST_ID;
-
-  // Attach shadow root
   const shadow = host.attachShadow({ mode: 'open' });
-
-  // Create Container inside Shadow DOM
   const container = document.createElement('div');
   container.id = 'pet-container';
   shadow.appendChild(container);
-
-  // Load CSS
   const link = document.createElement('link');
   link.rel = 'stylesheet';
   link.href = chrome.runtime.getURL('content/styles.css');
   shadow.appendChild(link);
-
-  // Initial Fetch
   const result = await chrome.storage.local.get(['user_stats', 'settings']);
   if (result.settings) {
       currentSettings = result.settings;
@@ -37,85 +24,59 @@ async function init() {
       currentStats = result.user_stats;
   }
   renderPet(container, currentStats);
-
-  // Listen for storage changes
   chrome.storage.onChanged.addListener((changes, area) => {
     if (area === 'local') {
       let needsRender = false;
-
       if (changes.settings) {
           currentSettings = changes.settings.newValue;
           needsRender = true;
       }
-
       if (changes.user_stats) {
           currentStats = changes.user_stats.newValue;
           needsRender = true;
       }
-
       if (needsRender && currentStats) {
-          // Use requestIdleCallback for updates to minimize impact
           if ('requestIdleCallback' in window) {
               requestIdleCallback(() => renderPet(container, currentStats));
           } else {
-              // Fallback
               requestAnimationFrame(() => renderPet(container, currentStats));
           }
       }
     }
   });
-
-  // Listen for messages
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       if (message.action === 'STATE_UPDATE') {
           currentStats = message.stats;
           renderPet(container, currentStats);
       }
   });
-
-  // Optimize Animations: Pause when hidden
   document.addEventListener('visibilitychange', () => {
       const img = container.querySelector('.pet-image');
       if (!img) return;
-
       if (document.hidden) {
           img.classList.remove('anim-bounce');
       } else {
-          // Restore if state is NORMAL
           if (currentStats && currentStats.current_state === 'NORMAL') {
               img.classList.add('anim-bounce');
           }
       }
   });
-
   document.body.appendChild(host);
 }
-
 function renderPet(container, stats) {
   if (!stats) return;
-
   const state = stats.current_state || 'NORMAL';
   const skin = currentSettings.selected_skin || 'white_blob';
-
   container.innerHTML = '';
-
-  // Speech Bubble
   const bubble = document.createElement('div');
   bubble.className = 'speech-bubble';
   container.appendChild(bubble);
-
-  // Pet Image
   const img = document.createElement('img');
   img.className = 'pet-image';
-
-  // Determine image source based on state and skin
   let fileName = state.toLowerCase() + '.svg';
   let imgSrc = `assets/pets/${skin}/${fileName}`;
-
   let messageText = "Hi!";
   let extraClass = "";
-
-  // Helper for insults
   const getInsult = (defaultMsg) => {
       if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
           const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
@@ -123,7 +84,6 @@ function renderPet(container, stats) {
       }
       return defaultMsg;
   };
-
   switch (state) {
     case 'FAT':
       messageText = getInsult("Popcorn!");
@@ -142,9 +102,7 @@ function renderPet(container, stats) {
       messageText = "Hi!";
       break;
   }
-
   img.src = chrome.runtime.getURL(imgSrc);
-
   img.onerror = () => {
       console.warn(`Image failed to load: ${imgSrc}`);
       img.src = "";
@@ -153,26 +111,19 @@ function renderPet(container, stats) {
       img.style.height = "16px";
       img.style.display = "block";
   };
-
   if (extraClass) {
       container.className = extraClass;
   } else {
       container.className = '';
   }
-
-  // Use document.hidden to check if we should apply animation immediately
   if (state === 'NORMAL' && !document.hidden) {
       img.classList.add('anim-bounce');
   }
-
   container.appendChild(img);
-
   container.onclick = () => {
     if (state !== 'NORMAL' && currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
          messageText = getInsult(messageText);
     }
-
-    // Use textContent for safety (XSS prevention)
     bubble.textContent = messageText;
     bubble.classList.add('visible');
     setTimeout(() => {
@@ -180,5 +131,4 @@ function renderPet(container, stats) {
     }, 3000);
   };
 }
-
 init();
