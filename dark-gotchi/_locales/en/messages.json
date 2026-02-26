@@ -1,0 +1,77 @@
+{
+    "extensionName": {
+        "message": "Dark-gotchi"
+    },
+    "extensionDescription": {
+        "message": "A pixel pet that evolves based on your browsing habits."
+    },
+    "stateLabel": {
+        "message": "State: "
+    },
+    "distractionTime": {
+        "message": "Distraction Time: "
+    },
+    "minutes": {
+        "message": " min"
+    },
+    "petSkinTitle": {
+        "message": "Pet Skin"
+    },
+    "skinBlob": {
+        "message": "Blob"
+    },
+    "skinCat": {
+        "message": "Cat 🐱"
+    },
+    "skinDoge": {
+        "message": "Doge 🐕"
+    },
+    "skinHamster": {
+        "message": "Hamster 🐹"
+    },
+    "supportRewardsTitle": {
+        "message": "Support & Rewards"
+    },
+    "supportRewardsSubtitle": {
+        "message": "Support development and unlock all pet skins!"
+    },
+    "donationAmount": {
+        "message": "<strong>Support:</strong> $2 or more"
+    },
+    "donationMethod": {
+        "message": "<strong>Method:</strong> Support via Buy Me a Coffee"
+    },
+    "supportBtnText": {
+        "message": "Buy me a coffee"
+    },
+    "donationInstruction": {
+        "message": "Include your <strong>email/contact</strong> in house message to receive your code."
+    },
+    "licenseInputPlaceholder": {
+        "message": "Enter Reward Code (DG-...)"
+    },
+    "activateBtnText": {
+        "message": "Activate"
+    },
+    "proActivatedMsg": {
+        "message": "All skins unlocked!"
+    },
+    "invalidCodeMsg": {
+        "message": "Invalid Code (Ex: DG-1234)"
+    },
+    "lockOverlayTitle": {
+        "message": "Support to unlock all skins"
+    },
+    "petHi": {
+        "message": "Hi!"
+    },
+    "petFat": {
+        "message": "Popcorn!"
+    },
+    "petArrogant": {
+        "message": "Get a life"
+    },
+    "petBeggar": {
+        "message": "Check balance?"
+    }
+}

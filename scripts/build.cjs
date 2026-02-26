@@ -82,7 +82,8 @@ console.log('Build complete.');
 
 try {
     console.log('Zipping...');
-    execSync(`zip -r dist.zip ${DIST_DIR}`);
+    // We want the zip to contain the contents of dist, not the dist folder itself.
+    execSync(`cd ${DIST_DIR} && zip -r ../dist.zip ./*`);
     console.log('Zip created: dist.zip');
 } catch (e) {
     console.warn('Failed to zip (zip command might be missing).');

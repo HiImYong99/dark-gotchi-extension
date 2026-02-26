@@ -1,0 +1,77 @@
+{
+    "extensionName": {
+        "message": "다크고치"
+    },
+    "extensionDescription": {
+        "message": "당신의 브라우징 습관에 따라 진화하는 픽셀 펫입니다."
+    },
+    "stateLabel": {
+        "message": "상태: "
+    },
+    "distractionTime": {
+        "message": "집중 방해 시간: "
+    },
+    "minutes": {
+        "message": " 분"
+    },
+    "petSkinTitle": {
+        "message": "펫 스킨"
+    },
+    "skinBlob": {
+        "message": "블롭"
+    },
+    "skinCat": {
+        "message": "고양이 🐱"
+    },
+    "skinDoge": {
+        "message": "도지 🐕"
+    },
+    "skinHamster": {
+        "message": "햄스터 🐹"
+    },
+    "supportRewardsTitle": {
+        "message": "후원 및 보상"
+    },
+    "supportRewardsSubtitle": {
+        "message": "개발을 후원하고 모든 펫 스킨을 사용해 보세요!"
+    },
+    "donationAmount": {
+        "message": "<strong>후원:</strong> 2달러(약 3,000원) 이상"
+    },
+    "donationMethod": {
+        "message": "<strong>방법:</strong> Buy Me a Coffee를 통해 후원"
+    },
+    "supportBtnText": {
+        "message": "커피 한 잔 후원하기"
+    },
+    "donationInstruction": {
+        "message": "후원 메시지에 <strong>이메일 주소</strong>를 남겨주시면 코드를 보내드립니다."
+    },
+    "licenseInputPlaceholder": {
+        "message": "후원 코드 입력 (DG-...)"
+    },
+    "activateBtnText": {
+        "message": "활성화"
+    },
+    "proActivatedMsg": {
+        "message": "모든 스킨이 활성화되었습니다!"
+    },
+    "invalidCodeMsg": {
+        "message": "잘못된 코드입니다 (예: DG-1234)"
+    },
+    "lockOverlayTitle": {
+        "message": "후원하고 모든 스킨을 사용하세요"
+    },
+    "petHi": {
+        "message": "안녕!"
+    },
+    "petFat": {
+        "message": "팝콘 좀 그만 먹어..."
+    },
+    "petArrogant": {
+        "message": "인생 좀 사세요"
+    },
+    "petBeggar": {
+        "message": "잔액 확인은 해보셨나요?"
+    }
+}
