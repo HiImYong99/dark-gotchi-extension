@@ -1,202 +1,246 @@
 import { validateLicense } from '../lib/crypto-mini.js';
 
-let currentSettings = { is_pro: false, custom_insults: [], selected_skin: 'white_blob' };
-let currentItemState = { shield_active: false, shield_expiry: 0 };
+let currentSettings = { is_pro: false, selected_skin: 'white_blob' };
 let currentStats = { current_state: 'NORMAL', total_distraction_time: 0 };
-let currentPetProfile = { shield_used_today: false };
+let currentMapping = {};
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const result = await chrome.storage.local.get(['user_stats', 'settings', 'item_state', 'pet_profile']);
+    const result = await chrome.storage.local.get(['user_stats', 'settings', 'domain_mapping']);
 
-  if (result.user_stats) currentStats = result.user_stats;
-  if (result.settings) currentSettings = result.settings;
-  if (result.item_state) currentItemState = result.item_state;
-  if (result.pet_profile) currentPetProfile = result.pet_profile;
+    if (result.user_stats) currentStats = result.user_stats;
+    if (result.settings) currentSettings = result.settings;
+    if (result.domain_mapping) currentMapping = result.domain_mapping;
 
-  updateUI();
+    updateUI();
+    updateDomainLists();
 
-  // Storage Listener
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === 'local') {
-      if (changes.user_stats) currentStats = changes.user_stats.newValue;
-      if (changes.settings) currentSettings = changes.settings.newValue;
-      if (changes.item_state) currentItemState = changes.item_state.newValue;
-      if (changes.pet_profile) currentPetProfile = changes.pet_profile.newValue;
-      updateUI();
-    }
-  });
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            if (changes.user_stats) currentStats = changes.user_stats.newValue;
+            if (changes.settings) currentSettings = changes.settings.newValue;
+            if (changes.domain_mapping) {
+                currentMapping = changes.domain_mapping.newValue;
+                updateDomainLists();
+            }
+            updateUI();
+        }
+    });
 
-  setupEventListeners();
+    setupEventListeners();
 });
 
 function setupEventListeners() {
-  // Activate Pro Button
-  const activateBtn = document.getElementById('activate-btn');
-  if (activateBtn) {
-    activateBtn.addEventListener('click', async () => {
-      const input = document.getElementById('license-input');
-      const key = input.value.trim();
-      const msg = document.getElementById('license-msg');
+    const activateBtn = document.getElementById('activate-btn');
+    if (activateBtn) {
+        activateBtn.addEventListener('click', async () => {
+            const input = document.getElementById('license-input');
+            const key = input.value.trim();
+            const msg = document.getElementById('license-msg');
 
-      const isValid = await validateLicense(key);
+            // --- Secret Support Code Logic ---
+            if (key === 'Pet-forever') {
+                currentSettings.is_pro = true;
+                await chrome.storage.local.set({ settings: currentSettings });
+                msg.textContent = "❤️ Thank you! Secret pets unlocked!";
+                msg.style.color = "white";
+                setTimeout(() => location.reload(), 1000);
+                return;
+            }
+            // ---------------------------------
 
-      if (isValid) {
-        currentSettings.is_pro = true;
-        // Base64 encode key
-        currentSettings.license_key = btoa(key);
+            const isValid = await validateLicense(key);
 
-        await chrome.storage.local.set({ settings: currentSettings });
+            if (isValid) {
+                currentSettings.is_pro = true;
+                currentSettings.license_key = btoa(key);
+                await chrome.storage.local.set({ settings: currentSettings });
+                msg.textContent = "Pro features activated! Thanks!";
+                msg.style.color = "white";
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                msg.textContent = "Invalid code. Please try again.";
+                msg.style.color = "rgba(255,255,255,0.8)";
+            }
+        });
+    }
 
-        msg.textContent = "Pro Activated!";
-        msg.style.color = "green";
-      } else {
-        msg.textContent = "Invalid Key (Try DG-1234)";
-        msg.style.color = "red";
-      }
+    // Skin Selection & Locked Scroll Logic
+    const skinOptions = document.querySelectorAll('.skin-option');
+    skinOptions.forEach(opt => {
+        const input = opt.querySelector('input');
+
+        opt.addEventListener('click', (e) => {
+            const rewardSkins = ['doge', 'hamster'];
+            if (!currentSettings.is_pro && rewardSkins.includes(input.value)) {
+                e.preventDefault();
+                const store = document.getElementById('store-section');
+                if (store) {
+                    store.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    const licenseInput = document.getElementById('license-input');
+                    if (licenseInput) {
+                        licenseInput.focus();
+                    }
+                }
+            }
+        });
+
+        input.addEventListener('change', async (e) => {
+            if (currentSettings.is_pro || !['doge', 'hamster'].includes(e.target.value)) {
+                currentSettings.selected_skin = e.target.value;
+                await chrome.storage.local.set({ settings: currentSettings });
+            }
+        });
     });
-  }
 
-  // Shield Button
-  const shieldBtn = document.getElementById('shield-btn');
-  if (shieldBtn) {
-      shieldBtn.addEventListener('click', async () => {
-          if (!currentSettings.is_pro) return;
+    // Reset Button
+    const resetBtn = document.getElementById('reset-btn');
+    if (resetBtn) {
+        resetBtn.onclick = async () => {
+            if (confirm("Reset all distraction stats?")) {
+                currentStats.total_distraction_time = 0;
+                currentStats.top_distractions = {};
+                currentStats.category_times = {
+                    ENTERTAINMENT: 0, SOCIAL: 0, SHOPPING: 0, PRODUCTIVE: 0
+                };
+                currentStats.current_state = 'NORMAL';
+                await chrome.storage.local.set({ user_stats: currentStats });
+                updateUI();
+            }
+        };
+    }
 
-          const now = Date.now();
-          if (currentItemState.shield_active && currentItemState.shield_expiry > now) {
-              return; // Already active
-          }
+    // Guide Toggle
+    const guideToggle = document.getElementById('guide-toggle');
+    const guideContent = document.getElementById('guide-content');
+    if (guideToggle && guideContent) {
+        guideToggle.onclick = () => {
+            guideContent.classList.toggle('hidden');
+            const chevron = guideToggle.querySelector('.chevron');
+            if (chevron) {
+                chevron.textContent = guideContent.classList.contains('hidden') ? '▾' : '▴';
+            }
+        };
+    }
 
-          if (currentPetProfile.shield_used_today) {
-              alert("Shield already used today! Resets at midnight.");
-              return;
-          }
+    // Add Site logic
+    const addBtn = document.getElementById('add-site-btn');
+    if (addBtn) {
+        addBtn.onclick = async () => {
+            const input = document.getElementById('new-domain');
+            const select = document.getElementById('new-category');
+            const domain = input.value.trim().toLowerCase();
+            const category = select.value;
 
-          const newState = { ...currentItemState };
-          newState.shield_active = true;
-          newState.shield_expiry = now + 24 * 60 * 60 * 1000;
+            if (domain && !currentMapping[domain]) {
+                currentMapping[domain] = category;
+                await chrome.storage.local.set({ domain_mapping: currentMapping });
+                input.value = '';
+                updateDomainLists();
+            }
+        };
+    }
 
-          const newProfile = { ...currentPetProfile };
-          newProfile.shield_used_today = true;
+    // Summon Pet Logic
+    const summonBtn = document.getElementById('summon-btn');
+    if (summonBtn) {
+        summonBtn.onclick = async () => {
+            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tab) {
+                try {
+                    // Inject CSS first
+                    await chrome.scripting.insertCSS({
+                        target: { tabId: tab.id },
+                        files: ['content/styles.css']
+                    });
+                    // Then inject JS
+                    await chrome.scripting.executeScript({
+                        target: { tabId: tab.id },
+                        files: ['content/content.js']
+                    });
 
-          await chrome.storage.local.set({ item_state: newState, pet_profile: newProfile });
-      });
-  }
+                    summonBtn.textContent = "✅ Joined!";
+                    setTimeout(() => { summonBtn.textContent = "🐾 Join Me"; }, 2000);
+                } catch (err) {
+                    console.error("Failed to summon pet:", err);
+                    alert("Cannot summon pet on this page (e.g., Chrome internal pages).");
+                }
+            }
+        };
+    }
 
-  // Skin Selector
-  const radios = document.querySelectorAll('input[name="skin"]');
-  radios.forEach(r => {
-      r.addEventListener('change', async (e) => {
-          if (!currentSettings.is_pro) {
-              e.target.checked = false;
-              updateUI();
-              return;
-          }
-          currentSettings.selected_skin = e.target.value;
-          await chrome.storage.local.set({ settings: currentSettings });
-      });
-  });
-
-  // Save Insults
-  const saveInsultsBtn = document.getElementById('save-insults-btn');
-  if (saveInsultsBtn) {
-      saveInsultsBtn.addEventListener('click', async () => {
-          if (!currentSettings.is_pro) return;
-          const textarea = document.getElementById('insult-input');
-          const text = textarea.value;
-          const insults = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-
-          currentSettings.custom_insults = insults;
-          await chrome.storage.local.set({ settings: currentSettings });
-          alert('Insults saved!');
-      });
-  }
+    // Easter Egg
+    const logo = document.querySelector('.logo');
+    if (logo) {
+        let clickCount = 0;
+        logo.onclick = () => {
+            clickCount++;
+            if (clickCount === 7) {
+                alert("🌈 RAINBOW MODE UNLOCKED!");
+                chrome.storage.local.set({ secret_mode: true });
+            }
+        };
+    }
 }
 
 function updateUI() {
-    // 1. Dashboard
     const state = currentStats.current_state || 'NORMAL';
-    const minutes = Math.floor((currentStats.total_distraction_time || 0) / 60);
+    const totalDistTime = currentStats.total_distraction_time || 0;
+    const minutes = Math.floor(totalDistTime / 60);
+    const level = Math.min(20, Math.floor(minutes / 5) + 1);
 
-    document.getElementById('state-text').textContent = `State: ${state}`;
+    document.getElementById('state-text').textContent = state === 'NORMAL' ? 'HEALTHY' : state;
     document.getElementById('distraction-time').textContent = minutes;
+    document.getElementById('distraction-level').textContent = `Lv. ${level}`;
 
-    // Pet Image Preview
     const skin = currentSettings.selected_skin || 'white_blob';
     const fileName = state.toLowerCase() + '.svg';
     const img = document.getElementById('pet-display');
-    img.src = `../assets/pets/${skin}/${fileName}`;
-    img.onerror = () => { img.src = ""; img.style.backgroundColor="magenta"; };
+    if (img) img.src = `../assets/pets/${skin}/${fileName}`;
 
-    // 2. Pro Features Visibility & Locking
     const isPro = currentSettings.is_pro;
-    const proSection = document.getElementById('pro-features');
     const storeSection = document.getElementById('store-section');
+    const appContainer = document.querySelector('.app-container');
 
     if (isPro) {
-        // Pro Active: Show Features Unlocked, Hide Store
-        proSection.classList.remove('hidden');
-        storeSection.classList.add('hidden');
-
-        // Remove overlay
-        const overlay = proSection.querySelector('.lock-overlay');
-        if (overlay) overlay.remove();
-
+        if (storeSection) storeSection.classList.add('hidden');
+        if (appContainer) appContainer.classList.add('is-pro');
     } else {
-        // Not Pro: Show Store, Show Features Locked
-        proSection.classList.remove('hidden');
-        storeSection.classList.remove('hidden');
-
-        // Add Lock Overlay
-        if (!proSection.querySelector('.lock-overlay')) {
-            const overlay = document.createElement('div');
-            overlay.className = 'lock-overlay';
-            overlay.textContent = '🔒';
-            overlay.title = "Buy PRO to unlock";
-            overlay.onclick = () => {
-                storeSection.scrollIntoView({ behavior: 'smooth' });
-                storeSection.style.transition = "background-color 0.5s";
-                storeSection.style.backgroundColor = "#fff9c4"; // light yellow
-                setTimeout(() => storeSection.style.backgroundColor = "white", 1000);
-            };
-            proSection.appendChild(overlay);
-        }
+        if (storeSection) storeSection.classList.remove('hidden');
+        if (appContainer) appContainer.classList.remove('is-pro');
     }
 
-    // 3. Shield Status
-    const shieldStatus = document.getElementById('shield-status');
-    const shieldBtn = document.getElementById('shield-btn');
-    const now = Date.now();
-
-    if (currentItemState.shield_active && currentItemState.shield_expiry > now) {
-        const hoursLeft = Math.ceil((currentItemState.shield_expiry - now) / (60*60*1000));
-        shieldStatus.textContent = `Active (${hoursLeft}h left)`;
-        shieldStatus.style.color = "green";
-        shieldBtn.textContent = "Shield Active";
-        shieldBtn.disabled = true;
-    } else if (currentPetProfile.shield_used_today) {
-        shieldStatus.textContent = "Used Today (Resets Midnight)";
-        shieldStatus.style.color = "orange";
-        shieldBtn.textContent = "Cooldown";
-        shieldBtn.disabled = true;
-    } else {
-        shieldStatus.textContent = "Inactive";
-        shieldStatus.style.color = "grey";
-        shieldBtn.textContent = "Activate Shield (24h)";
-        shieldBtn.disabled = false;
-    }
-
-    // 4. Skin Selection UI
     const radios = document.querySelectorAll('input[name="skin"]');
     radios.forEach(r => {
-        if (r.value === (currentSettings.selected_skin || 'white_blob')) {
-            r.checked = true;
+        if (r.value === skin) r.checked = true;
+    });
+}
+
+function updateDomainLists() {
+    const whiteList = document.getElementById('white-list');
+    const blackList = document.getElementById('black-list');
+    if (!whiteList || !blackList) return;
+
+    whiteList.innerHTML = '';
+    blackList.innerHTML = '';
+
+    Object.entries(currentMapping).forEach(([domain, category]) => {
+        const chip = document.createElement('div');
+        chip.className = 'domain-chip';
+        chip.innerHTML = `${domain} <span class="remove-site" data-domain="${domain}">×</span>`;
+
+        if (category === 'PRODUCTIVE') {
+            whiteList.appendChild(chip);
+        } else {
+            blackList.appendChild(chip);
         }
     });
 
-    // 5. Insults UI
-    const textarea = document.getElementById('insult-input');
-    if (document.activeElement !== textarea && currentSettings.custom_insults) {
-        textarea.value = currentSettings.custom_insults.join('\n');
-    }
+    document.querySelectorAll('.remove-site').forEach(btn => {
+        btn.onclick = async (e) => {
+            const domain = e.target.getAttribute('data-domain');
+            delete currentMapping[domain];
+            await chrome.storage.local.set({ domain_mapping: currentMapping });
+            updateDomainLists();
+        };
+    });
 }

@@ -2,63 +2,103 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <title>Dark-gotchi</title>
+  <title>Browser-Pet</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Dark-gotchi</h1>
-    <div id="status-container">
-      <img id="pet-display" src="../assets/pets/white_blob/normal.svg" alt="Pet State">
-      <p id="state-text">State: NORMAL</p>
-    </div>
-    <div class="stats">
-      <p>Distraction Time: <span id="distraction-time">0</span> min</p>
-    </div>
-
-    <!-- PRO Features Area -->
-    <div id="pro-features" class="section hidden">
-      <h3>Pro Features</h3>
-
-      <!-- Shield -->
-      <div class="feature-box">
-        <h4>Shield Item</h4>
-        <p class="desc">50% slower corruption for 24h.</p>
-        <button id="shield-btn">Activate Shield</button>
-        <p id="shield-status"></p>
-      </div>
-
-      <!-- Skins -->
-      <div class="feature-box">
-        <h4>Pet Skin</h4>
-        <div class="skin-selector">
-          <label><input type="radio" name="skin" value="white_blob"> Blob</label>
-          <label><input type="radio" name="skin" value="cat"> Cat 🐱</label>
-          <label><input type="radio" name="skin" value="hamster"> Hamster 🐹</label>
+  <div class="app-container">
+    <header>
+      <h1 class="logo">Browser-Pet</h1>
+      <div class="header-actions">
+        <button id="summon-btn" class="summon-btn" title="Bring Pet here">🐾 Join Me</button>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span id="state-text">HEALTHY</span>
         </div>
       </div>
+    </header>
 
-      <!-- Custom Insults -->
-      <div class="feature-box">
-        <h4>Custom Insults</h4>
-        <textarea id="insult-input" placeholder="Enter insults (one per line)"></textarea>
-        <button id="save-insults-btn">Save Insults</button>
-      </div>
-    </div>
+    <main>
+      <section class="hero-section">
+        <div class="pet-preview-card">
+          <div class="glow-bg"></div>
+          <img id="pet-display" src="../assets/pets/white_blob/normal.svg" alt="Pet Preview">
+        </div>
+        
+        <div class="stats-row">
+          <div class="stat-group">
+            <span class="stat-label">DISTRACTION</span>
+            <span class="stat-value"><span id="distraction-time">0</span><small>min</small></span>
+          </div>
+          <div class="stat-group align-right">
+            <span class="stat-label">LEVEL</span>
+            <span class="stat-value highlight" id="distraction-level">Lv. 1</span>
+          </div>
+          <button id="reset-btn" class="reset-icon-btn">🔄</button>
+        </div>
+      </section>
 
-    <!-- Store / Activation -->
-    <div id="store-section" class="section">
-      <h3>Get PRO</h3>
-      <p>Unlock skins, shield, and custom insults!</p>
-      <a href="https://gumroad.com" target="_blank" class="buy-btn">Buy PRO License</a>
+      <section class="skin-selector">
+        <h2 class="section-title">Select Skin</h2>
+        <div class="skin-grid">
+          <label class="skin-option">
+            <input type="radio" name="skin" value="white_blob">
+            <div class="skin-card"><span>Blob</span></div>
+          </label>
+          <label class="skin-option">
+            <input type="radio" name="skin" value="cat">
+            <div class="skin-card"><span>Cat 🐱</span></div>
+          </label>
+          <label class="skin-option reward-locked">
+            <input type="radio" name="skin" value="doge">
+            <div class="skin-card"><span>Doge 🐕</span></div>
+          </label>
+          <label class="skin-option reward-locked">
+            <input type="radio" name="skin" value="hamster">
+            <div class="skin-card"><span>Hamster 🐹</span></div>
+          </label>
+        </div>
+      </section>
 
-      <div class="license-input-area">
-        <input type="text" id="license-input" placeholder="Enter License Key (DG-...)">
-        <button id="activate-btn">Activate</button>
-      </div>
-      <p id="license-msg"></p>
-    </div>
+      <section id="store-section" class="premium-card">
+        <h3>Unlock Secret Pets 💖</h3>
+        <p>Support us and get more petite pals.</p>
+        <div class="unlock-form">
+          <input type="text" id="license-input" placeholder="Enter secret code">
+          <button id="activate-btn">Unlock</button>
+        </div>
+        <a href="https://buymeacoffee.com/yong9" target="_blank" class="bmc-link">Buy me a coffee ☕</a>
+        <p id="license-msg"></p>
+      </section>
 
+      <section class="guide-section">
+        <div class="guide-toggle" id="guide-toggle">
+          <span>How it works?</span>
+          <span class="chevron">▾</span>
+        </div>
+        <div id="guide-content" class="guide-content hidden">
+          <div class="add-site-area">
+            <input type="text" id="new-domain" placeholder="example.com">
+            <select id="new-category">
+              <option value="PRODUCTIVE">White</option>
+              <option value="ENTERTAINMENT">Black</option>
+            </select>
+            <button id="add-site-btn">+</button>
+          </div>
+          <div class="guide-group">
+            <h5 class="white-tag">White Sites (Heals Pet)</h5>
+            <div id="white-list" class="domain-tag-cloud"></div>
+          </div>
+          <div class="guide-group">
+            <h5 class="black-tag">Black Sites (Curses Pet)</h5>
+            <div id="black-list" class="domain-tag-cloud"></div>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
   <script src="popup.js" type="module"></script>
 </body>

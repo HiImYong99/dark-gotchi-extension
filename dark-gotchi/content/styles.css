@@ -1,11 +1,14 @@
 :host {
-  all: initial; /* Reset everything */
+  all: initial;
+  /* Reset everything */
   z-index: 2147483647;
   position: fixed;
   bottom: 20px;
   right: 20px;
-  pointer-events: none; /* Let clicks pass through container */
-  font-family: 'Courier New', Courier, monospace; /* Pixel art vibe */
+  pointer-events: none;
+  /* Let clicks pass through container */
+  font-family: 'Courier New', Courier, monospace;
+  /* Pixel art vibe */
 }
 
 #pet-container {
@@ -13,14 +16,16 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  pointer-events: auto; /* Enable clicks on pet itself */
+  pointer-events: auto;
+  /* Enable clicks on pet itself */
   cursor: pointer;
 }
 
 .pet-image {
   width: 64px;
   height: 64px;
-  image-rendering: pixelated; /* Enhance pixel art look */
+  image-rendering: pixelated;
+  /* Enhance pixel art look */
   transition: transform 0.3s ease;
 }
 
@@ -45,7 +50,8 @@
   margin-bottom: 5px;
   font-size: 12px;
   color: black;
-  display: none; /* Hidden by default */
+  display: none;
+  /* Hidden by default */
   opacity: 0;
   transition: opacity 0.3s;
   white-space: nowrap;
@@ -58,10 +64,53 @@
 
 /* Animations */
 @keyframes bounce {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-5px); }
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-5px);
+  }
 }
 
 .anim-bounce {
   animation: bounce 1s infinite;
+}
+
+@keyframes walk {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  25% {
+    transform: translateY(-3px) rotate(2deg);
+  }
+
+  50% {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  75% {
+    transform: translateY(-3px) rotate(-2deg);
+  }
+
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+.anim-walk {
+  animation: walk 0.5s infinite linear;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
 }

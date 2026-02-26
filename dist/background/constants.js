@@ -19,10 +19,10 @@ export const DOMAIN_MAPPING = {
   'docs.google.com': CATEGORIES.PRODUCTIVE
 };
 export const EVOLUTION_THRESHOLDS = {
-  ENTERTAINMENT: 10 * 60,
-  SOCIAL: 10 * 60,
-  SHOPPING: 5 * 60,
-  PRODUCTIVE: 30 * 60
+  ENTERTAINMENT: 100 * 60, 
+  SOCIAL: 100 * 60,
+  SHOPPING: 100 * 60,
+  PRODUCTIVE: 15 * 60
 };
 export const PET_STATES = {
   NORMAL: 'NORMAL',

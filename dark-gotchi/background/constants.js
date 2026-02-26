@@ -21,10 +21,10 @@ export const DOMAIN_MAPPING = {
 };
 
 export const EVOLUTION_THRESHOLDS = {
-  ENTERTAINMENT: 10 * 60, // 10 minutes in seconds
-  SOCIAL: 10 * 60,
-  SHOPPING: 5 * 60,
-  PRODUCTIVE: 30 * 60
+  ENTERTAINMENT: 100 * 60, // 100 minutes (20 stages of 5 mins)
+  SOCIAL: 100 * 60,
+  SHOPPING: 100 * 60,
+  PRODUCTIVE: 15 * 60
 };
 
 export const PET_STATES = {
