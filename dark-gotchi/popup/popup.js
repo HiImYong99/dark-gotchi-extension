@@ -1,6 +1,6 @@
 import { validateLicense } from '../lib/crypto-mini.js';
 
-let currentSettings = { is_pro: false, selected_skin: 'white_blob' };
+let currentSettings = { is_pro: false, selected_skin: 'white_blob', is_enabled: true };
 let currentStats = { current_state: 'NORMAL', total_distraction_time: 0 };
 let currentMapping = {};
 
@@ -140,30 +140,18 @@ function setupEventListeners() {
         };
     }
 
-    // Summon Pet Logic
+    // Summon Pet Logic (now Toggle Pet)
     const summonBtn = document.getElementById('summon-btn');
     if (summonBtn) {
         summonBtn.onclick = async () => {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            if (tab) {
-                try {
-                    // Inject CSS first
-                    await chrome.scripting.insertCSS({
-                        target: { tabId: tab.id },
-                        files: ['content/styles.css']
-                    });
-                    // Then inject JS
-                    await chrome.scripting.executeScript({
-                        target: { tabId: tab.id },
-                        files: ['content/content.js']
-                    });
+            const newState = currentSettings.is_enabled === false ? true : false;
+            currentSettings.is_enabled = newState;
+            await chrome.storage.local.set({ settings: currentSettings });
 
-                    summonBtn.textContent = "✅ Joined!";
-                    setTimeout(() => { summonBtn.textContent = "🐾 Join Me"; }, 2000);
-                } catch (err) {
-                    console.error("Failed to summon pet:", err);
-                    alert("Cannot summon pet on this page (e.g., Chrome internal pages).");
-                }
+            if (newState) {
+                summonBtn.textContent = "🐾 Disable";
+            } else {
+                summonBtn.textContent = "🐾 Enable";
             }
         };
     }
@@ -183,6 +171,15 @@ function setupEventListeners() {
 }
 
 function updateUI() {
+    const summonBtn = document.getElementById('summon-btn');
+    if (summonBtn) {
+        if (currentSettings.is_enabled === false) {
+            summonBtn.textContent = "🐾 Enable";
+        } else {
+            summonBtn.textContent = "🐾 Disable";
+        }
+    }
+
     const state = currentStats.current_state || 'NORMAL';
     const totalDistTime = currentStats.total_distraction_time || 0;
     const minutes = Math.floor(totalDistTime / 60);

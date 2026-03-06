@@ -14,7 +14,7 @@ let dizzyTimeout = null;
 let shakeCount = 0;
 let lastShakeTime = 0;
 
-async function init() {
+async function initPet() {
     if (document.getElementById(HOST_ID)) return;
 
     const host = document.createElement('div');
@@ -43,6 +43,14 @@ async function init() {
             if (changes.settings) {
                 currentSettings = changes.settings.newValue;
                 needsRender = true;
+
+                if (currentSettings.is_enabled === false) {
+                    removePet();
+                    needsRender = false;
+                } else if (currentSettings.is_enabled !== false && !document.getElementById(HOST_ID)) {
+                    initPet();
+                    needsRender = false;
+                }
             }
             if (changes.user_stats) {
                 currentStats = changes.user_stats.newValue;
@@ -226,4 +234,20 @@ function triggerDizzy(bubble, img) {
     }, 5000);
 }
 
-init();
+function removePet() {
+    const host = document.getElementById(HOST_ID);
+    if (host) {
+        host.remove();
+    }
+    if (wanderInterval) {
+        clearInterval(wanderInterval);
+        wanderInterval = null;
+    }
+}
+
+// Auto-run if enabled
+chrome.storage.local.get(['settings'], (result) => {
+    if (!result.settings || result.settings.is_enabled !== false) {
+        initPet();
+    }
+});

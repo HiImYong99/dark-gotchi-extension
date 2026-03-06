@@ -1,4 +1,5 @@
 import { CATEGORIES, DOMAIN_MAPPING, EVOLUTION_THRESHOLDS, PET_STATES } from './constants.js';
+import { getCategory } from '../lib/url_matcher.js';
 
 const ALARM_NAME = 'tracking_alarm';
 
@@ -29,13 +30,25 @@ chrome.runtime.onInstalled.addListener(() => {
           is_pro: false,
           license_key: "",
           custom_insults: [],
-          selected_skin: "white_blob"
+          selected_skin: "white_blob",
+          is_enabled: true
         }
       });
-    } else if (!result.settings.selected_skin) {
+    } else {
       // Migration for existing users (if any)
-      const newSettings = { ...result.settings, selected_skin: "white_blob" };
-      chrome.storage.local.set({ settings: newSettings });
+      let needsUpdate = false;
+      const newSettings = { ...result.settings };
+      if (newSettings.selected_skin === undefined) {
+        newSettings.selected_skin = "white_blob";
+        needsUpdate = true;
+      }
+      if (newSettings.is_enabled === undefined) {
+        newSettings.is_enabled = true;
+        needsUpdate = true;
+      }
+      if (needsUpdate) {
+        chrome.storage.local.set({ settings: newSettings });
+      }
     }
 
     if (!result.pet_profile) {
@@ -67,17 +80,6 @@ chrome.runtime.onInstalled.addListener(() => {
   // Create alarm
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
 });
-
-// Helper to get category
-function getCategory(domain, mapping) {
-  if (!domain || !mapping) return CATEGORIES.UNKNOWN;
-  for (const [key, category] of Object.entries(mapping)) {
-    if (domain.includes(key)) {
-      return category;
-    }
-  }
-  return CATEGORIES.UNKNOWN;
-}
 
 // Track active tab updates
 async function updateCurrentDomain() {
