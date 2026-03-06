@@ -147,48 +147,61 @@ function updatePetVisual(container, stats) {
     let imgSrc = `assets/pets/${skin}/${primaryFileName}`;
     let fallbackImgSrc = `assets/pets/${skin}/${fallbackFileName}`;
 
-    let messageText = chrome.i18n.getMessage('petHi');
+    let messageText = "Hi!";
     let extraClass = "";
 
-    const getInsult = (defaultMsgKey) => {
-        if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
-            const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
-            return currentSettings.custom_insults[idx];
-        }
-        return chrome.i18n.getMessage(defaultMsgKey);
-    };
+    try {
+        messageText = chrome.i18n.getMessage('petHi');
 
-    switch (state) {
-        case 'FAT':
-            messageText = getInsult('petFat');
-            extraClass = 'state-fat';
-            break;
-        case 'ARROGANT':
-            messageText = getInsult('petArrogant');
-            extraClass = 'state-arrogant';
-            break;
-        case 'BEGGAR':
-            messageText = getInsult('petBeggar');
-            extraClass = 'state-beggar';
-            break;
-        case 'NORMAL':
-        default:
-            messageText = chrome.i18n.getMessage('petHi');
-            break;
-    }
-
-    img.src = chrome.runtime.getURL(imgSrc);
-    img.onerror = () => {
-        // Fallback to the SVG state-based architecture if png doesn't exist
-        img.onerror = () => {
-            img.src = "";
-            img.style.backgroundColor = "magenta";
-            img.style.width = "16px";
-            img.style.height = "16px";
-            img.style.display = "block";
+        const getInsult = (defaultMsgKey) => {
+            if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
+                const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
+                return currentSettings.custom_insults[idx];
+            }
+            return chrome.i18n.getMessage(defaultMsgKey);
         };
-        img.src = chrome.runtime.getURL(fallbackImgSrc);
-    };
+
+        switch (state) {
+            case 'FAT':
+                messageText = getInsult('petFat');
+                extraClass = 'state-fat';
+                break;
+            case 'ARROGANT':
+                messageText = getInsult('petArrogant');
+                extraClass = 'state-arrogant';
+                break;
+            case 'BEGGAR':
+                messageText = getInsult('petBeggar');
+                extraClass = 'state-beggar';
+                break;
+            case 'NORMAL':
+            default:
+                messageText = chrome.i18n.getMessage('petHi');
+                break;
+        }
+
+        img.src = chrome.runtime.getURL(imgSrc);
+        img.onerror = () => {
+            // Fallback to the SVG state-based architecture if png doesn't exist
+            img.onerror = () => {
+                img.src = "";
+                img.style.backgroundColor = "magenta";
+                img.style.width = "16px";
+                img.style.height = "16px";
+                img.style.display = "block";
+            };
+            try {
+                img.src = chrome.runtime.getURL(fallbackImgSrc);
+            } catch (err) {
+                // Ignore context invalidated
+            }
+        };
+    } catch (e) {
+        // "Extension context invalidated" error occurs when the extension is updated/reloaded
+        // but the old content script is still running. We fail gracefully here.
+        console.warn("Dark-gotchi: Extension context invalidated. Please refresh the page.", e);
+        return;
+    }
 
     if (extraClass) {
         container.className = extraClass;
