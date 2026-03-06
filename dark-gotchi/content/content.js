@@ -29,10 +29,19 @@ async function initPet() {
 
     const link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = chrome.runtime.getURL('content/styles.css');
+    try {
+        link.href = chrome.runtime.getURL('content/styles.css');
+    } catch(e) {
+        return; // Context invalidated
+    }
     shadow.appendChild(link);
 
-    const result = await chrome.storage.local.get(['user_stats', 'settings', 'secret_mode']);
+    let result;
+    try {
+        result = await chrome.storage.local.get(['user_stats', 'settings', 'secret_mode']);
+    } catch(e) {
+        return; // Context invalidated
+    }
     if (result.settings) currentSettings = result.settings;
     if (result.user_stats) currentStats = result.user_stats;
     if (result.secret_mode) secretMode = true;
@@ -152,56 +161,69 @@ function updatePetVisual(container, stats) {
 
     try {
         messageText = chrome.i18n.getMessage('petHi');
+    } catch (e) {
+        // Context Invalidated, keep "Hi!"
+    }
 
-        const getInsult = (defaultMsgKey) => {
-            if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
-                const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
-                return currentSettings.custom_insults[idx];
-            }
-            return chrome.i18n.getMessage(defaultMsgKey);
-        };
-
-        switch (state) {
-            case 'FAT':
-                messageText = getInsult('petFat');
-                extraClass = 'state-fat';
-                break;
-            case 'ARROGANT':
-                messageText = getInsult('petArrogant');
-                extraClass = 'state-arrogant';
-                break;
-            case 'BEGGAR':
-                messageText = getInsult('petBeggar');
-                extraClass = 'state-beggar';
-                break;
-            case 'NORMAL':
-            default:
-                messageText = chrome.i18n.getMessage('petHi');
-                break;
+    const getInsult = (defaultMsgKey) => {
+        if (currentSettings.custom_insults && currentSettings.custom_insults.length > 0) {
+            const idx = Math.floor(Math.random() * currentSettings.custom_insults.length);
+            return currentSettings.custom_insults[idx];
         }
+        try {
+            return chrome.i18n.getMessage(defaultMsgKey);
+        } catch (e) {
+            return "!";
+        }
+    };
+
+    switch (state) {
+        case 'FAT':
+            messageText = getInsult('petFat');
+            extraClass = 'state-fat';
+            break;
+        case 'ARROGANT':
+            messageText = getInsult('petArrogant');
+            extraClass = 'state-arrogant';
+            break;
+        case 'BEGGAR':
+            messageText = getInsult('petBeggar');
+            extraClass = 'state-beggar';
+            break;
+        case 'NORMAL':
+        default:
+            try {
+                messageText = chrome.i18n.getMessage('petHi');
+            } catch(e) {
+                messageText = "Hi!";
+            }
+            break;
+    }
+
+    try {
 
         img.src = chrome.runtime.getURL(imgSrc);
-        img.onerror = () => {
-            // Fallback to the SVG state-based architecture if png doesn't exist
-            img.onerror = () => {
-                img.src = "";
-                img.style.backgroundColor = "magenta";
-                img.style.width = "16px";
-                img.style.height = "16px";
-                img.style.display = "block";
-            };
-            try {
-                img.src = chrome.runtime.getURL(fallbackImgSrc);
-            } catch (err) {
-                // Ignore context invalidated
-            }
-        };
-    } catch (e) {
-        // "Extension context invalidated" error occurs when the extension is updated/reloaded
-        // but the old content script is still running. We fail gracefully here.
+    } catch(e) {
+        // Context Invalidated
         console.warn("Dark-gotchi: Extension context invalidated. Please refresh the page.", e);
         return;
     }
+
+    img.onerror = () => {
+        // Fallback to the SVG state-based architecture if png doesn't exist
+        img.onerror = () => {
+            img.src = "";
+            img.style.backgroundColor = "magenta";
+            img.style.width = "16px";
+            img.style.height = "16px";
+            img.style.display = "block";
+        };
+        try {
+            img.src = chrome.runtime.getURL(fallbackImgSrc);
+        } catch (err) {
+            // Ignore context invalidated
+        }
+    };
 
     if (extraClass) {
         container.className = extraClass;
