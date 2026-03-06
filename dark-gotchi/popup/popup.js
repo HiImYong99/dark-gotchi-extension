@@ -179,6 +179,17 @@ function setupEventListeners() {
             } else {
                 summonBtn.textContent = "🐾 Enable";
             }
+
+            // Real-time global sync
+            const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*"] });
+            for (const tab of tabs) {
+                chrome.tabs.sendMessage(tab.id, {
+                    action: 'TOGGLE_PET',
+                    is_enabled: newState
+                }).catch(() => {
+                    // Ignore errors for tabs where content script isn't injected
+                });
+            }
         };
     }
 

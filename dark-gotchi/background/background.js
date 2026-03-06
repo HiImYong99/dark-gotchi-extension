@@ -114,9 +114,32 @@ async function updateCurrentDomain() {
 }
 
 chrome.tabs.onActivated.addListener(updateCurrentDomain);
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.active) {
-    updateCurrentDomain();
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    if (tab.active) {
+      updateCurrentDomain();
+    }
+
+    // Inject pet script if enabled
+    if (tab.url && (tab.url.startsWith('http://') || tab.url.startsWith('https://'))) {
+      try {
+        const result = await chrome.storage.local.get(['settings']);
+        if (!result.settings || result.settings.is_enabled !== false) {
+          // Check if already injected by sending a ping or just relying on initPet id check
+          // The safest way is to just inject, content.js has if(document.getElementById(HOST_ID)) return;
+          await chrome.scripting.insertCSS({
+            target: { tabId: tabId },
+            files: ['content/styles.css']
+          });
+          await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            files: ['content/content.js']
+          });
+        }
+      } catch (err) {
+        // Ignored, might be a restricted URL
+      }
+    }
   }
 });
 

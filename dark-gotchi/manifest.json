@@ -13,14 +13,6 @@
   "host_permissions": [
     "<all_urls>"
   ],
-  "content_scripts": [
-    {
-      "matches": ["<all_urls>"],
-      "css": ["content/styles.css"],
-      "js": ["content/content.js"],
-      "run_at": "document_idle"
-    }
-  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self'; object-src 'self';"
   },
