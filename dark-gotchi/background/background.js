@@ -31,7 +31,8 @@ chrome.runtime.onInstalled.addListener(() => {
           license_key: "",
           custom_insults: [],
           selected_skin: "white_blob",
-          is_enabled: true
+          is_enabled: true,
+          has_seen_onboarding: false
         }
       });
     } else {
@@ -44,6 +45,10 @@ chrome.runtime.onInstalled.addListener(() => {
       }
       if (newSettings.is_enabled === undefined) {
         newSettings.is_enabled = true;
+        needsUpdate = true;
+      }
+      if (newSettings.has_seen_onboarding === undefined) {
+        newSettings.has_seen_onboarding = false;
         needsUpdate = true;
       }
       if (needsUpdate) {

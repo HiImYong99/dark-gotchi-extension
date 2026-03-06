@@ -73,5 +73,20 @@
     },
     "petBeggar": {
         "message": "잔액 확인은 해보셨나요?"
+    },
+    "onboardingTitle": {
+        "message": "다크고치에 오신 것을 환영합니다! 🎉"
+    },
+    "onboardingDesc": {
+        "message": "다크고치는 당신의 브라우징 습관을 반영합니다. 아래 <b>How it works?</b>에서 집중(White) 사이트와 방해(Black) 사이트를 추가해 보세요!"
+    },
+    "onboardingClose": {
+        "message": "시작하기"
+    },
+    "howToUseTitle": {
+        "message": "이용 방법 (How to use)"
+    },
+    "howToUseDesc": {
+        "message": "• <b>집계 방식</b>: 현재 활성화된(보고 있는) 탭의 도메인을 기준으로 1분마다 시간을 측정합니다.<br>• <b>블랙/화이트 리스트</b>: 전체 URL(예: https://youtube.com/watch)을 입력해도 자동으로 도메인을 추출하여 하위 경로까지 모두 적용됩니다.<br>• <b>자동 렌더링</b>: 활성화 상태(Disable 버튼 표시)라면 모든 페이지 우측 하단에 펫이 나타납니다."
     }
 }
