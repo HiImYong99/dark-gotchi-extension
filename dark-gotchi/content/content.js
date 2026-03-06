@@ -117,13 +117,27 @@ function updatePetVisual(container, stats) {
     const totalTime = stats.total_distraction_time || 0;
     const petLevel = Math.min(20, Math.floor((totalTime / 60) / 5) + 1);
 
-    container.innerHTML = '';
-    const bubble = document.createElement('div');
-    bubble.className = 'speech-bubble';
-    container.appendChild(bubble);
+    let bubble = container.querySelector('.speech-bubble');
+    if (!bubble) {
+        bubble = document.createElement('div');
+        bubble.className = 'speech-bubble';
+        container.appendChild(bubble);
+    }
 
-    const img = document.createElement('img');
-    img.className = 'pet-image';
+    let img = container.querySelector('.pet-image');
+    if (!img) {
+        img = document.createElement('img');
+        img.className = 'pet-image';
+        container.appendChild(img);
+    }
+
+    // Dynamic Scaling: Base size is 64px. Each level adds 10% size.
+    // e.g., Level 1 = 64px, Level 5 = 64 * 1.4 = 89.6px
+    const baseSize = 64;
+    const scaleFactor = 1 + ((petLevel - 1) * 0.10);
+    const newSize = Math.floor(baseSize * scaleFactor);
+    img.style.width = `${newSize}px`;
+    img.style.height = `${newSize}px`;
 
     // Check if the user specifically requested a pet_lvl.png, fallback to standard SVGs
     // If the image errors out, we fallback to the SVG
@@ -192,8 +206,6 @@ function updatePetVisual(container, stats) {
     } else {
         img.style.filter = 'none';
     }
-
-    container.appendChild(img);
 
     container.onclick = () => {
         const now = Date.now();
