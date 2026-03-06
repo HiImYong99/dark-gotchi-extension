@@ -73,5 +73,20 @@
     },
     "petBeggar": {
         "message": "Check balance?"
+    },
+    "onboardingTitle": {
+        "message": "Welcome to Dark-gotchi! 🎉"
+    },
+    "onboardingDesc": {
+        "message": "Dark-gotchi reflects your browsing habits. Try adding productive (White) and distracting (Black) sites in the <b>How it works?</b> section below!"
+    },
+    "onboardingClose": {
+        "message": "Get Started"
+    },
+    "howToUseTitle": {
+        "message": "How to use"
+    },
+    "howToUseDesc": {
+        "message": "• <b>Tracking</b>: Time is measured every minute based on the currently active (focused) tab's domain.<br>• <b>Black/White Lists</b>: You can input full URLs (e.g., https://youtube.com/watch) and it will automatically extract the domain to match all sub-paths.<br>• <b>Auto Rendering</b>: If enabled (showing 'Disable' button), the pet will appear at the bottom right of all pages."
     }
 }

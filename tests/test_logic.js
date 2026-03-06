@@ -33,12 +33,12 @@ async function runTests() {
   if (result.user_stats.current_state !== 'NORMAL') throw new Error("Initial state failed: " + result.user_stats.current_state);
   console.log("PASS: Initial state is NORMAL");
 
-  // TEST 1: Entertainment (YouTube) -> FAT (10 mins)
+  // TEST 1: Entertainment (YouTube) -> FAT (100 mins)
   // Set mock active tab
   chrome.tabs.activeUrl = 'https://www.youtube.com/watch?v=123';
 
-  console.log("Simulating 10 mins of YouTube...");
-  for (let i = 0; i < 10; i++) {
+  console.log("Simulating 100 mins of YouTube...");
+  for (let i = 0; i < 100; i++) {
       if (chrome.alarms.onAlarm.cb) {
           await chrome.alarms.onAlarm.cb({ name: 'tracking_alarm' });
       }
@@ -47,25 +47,25 @@ async function runTests() {
   }
 
   result = await chrome.storage.local.get(['user_stats']);
-  if (result.user_stats.category_times.ENTERTAINMENT !== 600) {
+  if (result.user_stats.category_times.ENTERTAINMENT !== 6000) {
       throw new Error("Time accumulation failed: " + result.user_stats.category_times.ENTERTAINMENT);
   }
 
-  // Wait, if ENT >= 600, state should be FAT
+  // Wait, if ENT >= 6000, state should be FAT
   if (result.user_stats.current_state !== 'FAT') {
       console.log("Current State:", result.user_stats.current_state);
       console.log("Threshold:", EVOLUTION_THRESHOLDS.ENTERTAINMENT);
       console.log("Accumulated:", result.user_stats.category_times.ENTERTAINMENT);
       throw new Error("Evolution to FAT failed");
   }
-  console.log("PASS: Evolved to FAT after 10 mins YouTube");
+  console.log("PASS: Evolved to FAT after 100 mins YouTube");
 
-  // TEST 2: Productive (GitHub) -> NORMAL (30 mins)
+  // TEST 2: Productive (GitHub) -> NORMAL (15 mins)
   // Change tab to GitHub
   chrome.tabs.activeUrl = 'https://github.com/myrepo';
 
-  console.log("Simulating 30 mins of GitHub...");
-  for (let i = 0; i < 30; i++) {
+  console.log("Simulating 15 mins of GitHub...");
+  for (let i = 0; i < 15; i++) {
       if (chrome.alarms.onAlarm.cb) {
           await chrome.alarms.onAlarm.cb({ name: 'tracking_alarm' });
       }
@@ -79,13 +79,13 @@ async function runTests() {
   }
   // Verify counters reset
   if (result.user_stats.category_times.ENTERTAINMENT !== 0) throw new Error("Counters reset failed");
-  console.log("PASS: Recovered to NORMAL after 30 mins GitHub");
+  console.log("PASS: Recovered to NORMAL after 15 mins GitHub");
 
-  // TEST 3: Shopping (Coupang) -> BEGGAR (5 mins)
+  // TEST 3: Shopping (Coupang) -> BEGGAR (100 mins)
   chrome.tabs.activeUrl = 'https://www.coupang.com/vp/products/123';
 
-  console.log("Simulating 5 mins of Shopping...");
-  for (let i = 0; i < 5; i++) {
+  console.log("Simulating 100 mins of Shopping...");
+  for (let i = 0; i < 100; i++) {
       if (chrome.alarms.onAlarm.cb) {
           await chrome.alarms.onAlarm.cb({ name: 'tracking_alarm' });
       }
@@ -97,7 +97,7 @@ async function runTests() {
        console.log("Current State:", result.user_stats.current_state);
        throw new Error("Evolution to BEGGAR failed");
   }
-  console.log("PASS: Evolved to BEGGAR after 5 mins Shopping");
+  console.log("PASS: Evolved to BEGGAR after 100 mins Shopping");
 
   console.log("All Tests Passed!");
 }

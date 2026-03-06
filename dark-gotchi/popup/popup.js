@@ -1,6 +1,6 @@
 import { validateLicense } from '../lib/crypto-mini.js';
 
-let currentSettings = { is_pro: false, selected_skin: 'white_blob' };
+let currentSettings = { is_pro: false, selected_skin: 'white_blob', is_enabled: true, has_seen_onboarding: false };
 let currentStats = { current_state: 'NORMAL', total_distraction_time: 0 };
 let currentMapping = {};
 
@@ -11,8 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (result.settings) currentSettings = result.settings;
     if (result.domain_mapping) currentMapping = result.domain_mapping;
 
+    applyI18n();
     updateUI();
     updateDomainLists();
+
+    // Check Onboarding
+    if (currentSettings.has_seen_onboarding === false) {
+        showOnboarding();
+    }
 
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {
@@ -128,11 +134,31 @@ function setupEventListeners() {
         addBtn.onclick = async () => {
             const input = document.getElementById('new-domain');
             const select = document.getElementById('new-category');
-            const domain = input.value.trim().toLowerCase();
+            let domainInput = input.value.trim().toLowerCase();
             const category = select.value;
 
-            if (domain && !currentMapping[domain]) {
-                currentMapping[domain] = category;
+            if (!domainInput) return;
+
+            // Normalize URL using new URL()
+            try {
+                // Prepend http:// if missing protocol so new URL() can parse it properly
+                if (!domainInput.startsWith('http://') && !domainInput.startsWith('https://')) {
+                    domainInput = 'http://' + domainInput;
+                }
+                const urlObj = new URL(domainInput);
+                domainInput = urlObj.hostname;
+
+                // Remove 'www.' if the user wants generic matching (optional, but good for simplicity)
+                if (domainInput.startsWith('www.')) {
+                    domainInput = domainInput.substring(4);
+                }
+            } catch (e) {
+                // If it fails to parse, we'll try to use the raw input,
+                // but usually the http:// prepend catches most valid domains
+            }
+
+            if (domainInput && !currentMapping[domainInput]) {
+                currentMapping[domainInput] = category;
                 await chrome.storage.local.set({ domain_mapping: currentMapping });
                 input.value = '';
                 updateDomainLists();
@@ -140,31 +166,40 @@ function setupEventListeners() {
         };
     }
 
-    // Summon Pet Logic
+    // Summon Pet Logic (now Toggle Pet)
     const summonBtn = document.getElementById('summon-btn');
     if (summonBtn) {
         summonBtn.onclick = async () => {
-            const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-            if (tab) {
-                try {
-                    // Inject CSS first
-                    await chrome.scripting.insertCSS({
-                        target: { tabId: tab.id },
-                        files: ['content/styles.css']
-                    });
-                    // Then inject JS
-                    await chrome.scripting.executeScript({
-                        target: { tabId: tab.id },
-                        files: ['content/content.js']
-                    });
+            const newState = currentSettings.is_enabled === false ? true : false;
+            currentSettings.is_enabled = newState;
+            await chrome.storage.local.set({ settings: currentSettings });
 
-                    summonBtn.textContent = "✅ Joined!";
-                    setTimeout(() => { summonBtn.textContent = "🐾 Join Me"; }, 2000);
-                } catch (err) {
-                    console.error("Failed to summon pet:", err);
-                    alert("Cannot summon pet on this page (e.g., Chrome internal pages).");
-                }
+            if (newState) {
+                summonBtn.textContent = "🐾 Disable";
+            } else {
+                summonBtn.textContent = "🐾 Enable";
             }
+
+            // Real-time global sync
+            const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*"] });
+            for (const tab of tabs) {
+                chrome.tabs.sendMessage(tab.id, {
+                    action: 'TOGGLE_PET',
+                    is_enabled: newState
+                }).catch(() => {
+                    // Ignore errors for tabs where content script isn't injected
+                });
+            }
+        };
+    }
+
+    // Onboarding close logic
+    const onboardingBtn = document.getElementById('onboarding-close-btn');
+    if (onboardingBtn) {
+        onboardingBtn.onclick = async () => {
+            document.getElementById('onboarding-modal').classList.add('hidden');
+            currentSettings.has_seen_onboarding = true;
+            await chrome.storage.local.set({ settings: currentSettings });
         };
     }
 
@@ -183,6 +218,15 @@ function setupEventListeners() {
 }
 
 function updateUI() {
+    const summonBtn = document.getElementById('summon-btn');
+    if (summonBtn) {
+        if (currentSettings.is_enabled === false) {
+            summonBtn.textContent = "🐾 Enable";
+        } else {
+            summonBtn.textContent = "🐾 Disable";
+        }
+    }
+
     const state = currentStats.current_state || 'NORMAL';
     const totalDistTime = currentStats.total_distraction_time || 0;
     const minutes = Math.floor(totalDistTime / 60);
@@ -213,6 +257,23 @@ function updateUI() {
     radios.forEach(r => {
         if (r.value === skin) r.checked = true;
     });
+}
+
+function applyI18n() {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const msgKey = el.getAttribute('data-i18n');
+        const msg = chrome.i18n.getMessage(msgKey);
+        if (msg) {
+            el.innerHTML = msg; // innerHTML used to allow <br> and <b> tags from translation
+        }
+    });
+}
+
+function showOnboarding() {
+    const modal = document.getElementById('onboarding-modal');
+    if (modal) {
+        modal.classList.remove('hidden');
+    }
 }
 
 function updateDomainLists() {

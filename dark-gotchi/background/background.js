@@ -1,4 +1,5 @@
 import { CATEGORIES, DOMAIN_MAPPING, EVOLUTION_THRESHOLDS, PET_STATES } from './constants.js';
+import { getCategory } from '../lib/url_matcher.js';
 
 const ALARM_NAME = 'tracking_alarm';
 
@@ -29,13 +30,30 @@ chrome.runtime.onInstalled.addListener(() => {
           is_pro: false,
           license_key: "",
           custom_insults: [],
-          selected_skin: "white_blob"
+          selected_skin: "white_blob",
+          is_enabled: true,
+          has_seen_onboarding: false
         }
       });
-    } else if (!result.settings.selected_skin) {
+    } else {
       // Migration for existing users (if any)
-      const newSettings = { ...result.settings, selected_skin: "white_blob" };
-      chrome.storage.local.set({ settings: newSettings });
+      let needsUpdate = false;
+      const newSettings = { ...result.settings };
+      if (newSettings.selected_skin === undefined) {
+        newSettings.selected_skin = "white_blob";
+        needsUpdate = true;
+      }
+      if (newSettings.is_enabled === undefined) {
+        newSettings.is_enabled = true;
+        needsUpdate = true;
+      }
+      if (newSettings.has_seen_onboarding === undefined) {
+        newSettings.has_seen_onboarding = false;
+        needsUpdate = true;
+      }
+      if (needsUpdate) {
+        chrome.storage.local.set({ settings: newSettings });
+      }
     }
 
     if (!result.pet_profile) {
@@ -68,17 +86,6 @@ chrome.runtime.onInstalled.addListener(() => {
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
 });
 
-// Helper to get category
-function getCategory(domain, mapping) {
-  if (!domain || !mapping) return CATEGORIES.UNKNOWN;
-  for (const [key, category] of Object.entries(mapping)) {
-    if (domain.includes(key)) {
-      return category;
-    }
-  }
-  return CATEGORIES.UNKNOWN;
-}
-
 // Track active tab updates
 async function updateCurrentDomain() {
   try {
@@ -107,9 +114,32 @@ async function updateCurrentDomain() {
 }
 
 chrome.tabs.onActivated.addListener(updateCurrentDomain);
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.active) {
-    updateCurrentDomain();
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    if (tab.active) {
+      updateCurrentDomain();
+    }
+
+    // Inject pet script if enabled
+    if (tab.url && (tab.url.startsWith('http://') || tab.url.startsWith('https://'))) {
+      try {
+        const result = await chrome.storage.local.get(['settings']);
+        if (!result.settings || result.settings.is_enabled !== false) {
+          // Check if already injected by sending a ping or just relying on initPet id check
+          // The safest way is to just inject, content.js has if(document.getElementById(HOST_ID)) return;
+          await chrome.scripting.insertCSS({
+            target: { tabId: tabId },
+            files: ['content/styles.css']
+          });
+          await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            files: ['content/content.js']
+          });
+        }
+      } catch (err) {
+        // Ignored, might be a restricted URL
+      }
+    }
   }
 });
 
