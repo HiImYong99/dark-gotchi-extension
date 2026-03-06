@@ -1,0 +1,98 @@
+{
+    "extensionName": {
+        "message": "다크고치"
+    },
+    "extensionDescription": {
+        "message": "당신의 브라우징 습관에 따라 진화하는 픽셀 펫입니다."
+    },
+    "stateLabel": {
+        "message": "상태: "
+    },
+    "distractionTime": {
+        "message": "집중 방해 시간: "
+    },
+    "minutes": {
+        "message": " 분"
+    },
+    "petSkinTitle": {
+        "message": "펫 스킨"
+    },
+    "skinBlob": {
+        "message": "블롭"
+    },
+    "skinCat": {
+        "message": "고양이 🐱"
+    },
+    "skinDoge": {
+        "message": "도지 🐕"
+    },
+    "skinHamster": {
+        "message": "햄스터 🐹"
+    },
+    "supportRewardsTitle": {
+        "message": "후원 및 보상"
+    },
+    "supportRewardsSubtitle": {
+        "message": "개발을 후원하고 모든 펫 스킨을 사용해 보세요!"
+    },
+    "donationAmount": {
+        "message": "<strong>후원:</strong> 2달러(약 3,000원) 이상"
+    },
+    "donationMethod": {
+        "message": "<strong>방법:</strong> Buy Me a Coffee를 통해 후원"
+    },
+    "supportBtnText": {
+        "message": "커피 한 잔 후원하기"
+    },
+    "donationInstruction": {
+        "message": "후원 메시지에 <strong>이메일 주소</strong>를 남겨주시면 코드를 보내드립니다."
+    },
+    "licenseInputPlaceholder": {
+        "message": "후원 코드 입력 (DG-...)"
+    },
+    "activateBtnText": {
+        "message": "활성화"
+    },
+    "proActivatedMsg": {
+        "message": "모든 스킨이 활성화되었습니다!"
+    },
+    "invalidCodeMsg": {
+        "message": "잘못된 코드입니다 (예: DG-1234)"
+    },
+    "lockOverlayTitle": {
+        "message": "후원하고 모든 스킨을 사용하세요"
+    },
+    "petHi": {
+        "message": "안녕!"
+    },
+    "petFat": {
+        "message": "팝콘 좀 그만 먹어..."
+    },
+    "petArrogant": {
+        "message": "인생 좀 사세요"
+    },
+    "petBeggar": {
+        "message": "잔액 확인은 해보셨나요?"
+    },
+    "onboardingTitle": {
+        "message": "다크고치에 오신 것을 환영합니다! 🎉"
+    },
+    "onboardingDesc": {
+        "message": "다크고치는 당신의 브라우징 습관을 반영합니다. 아래 <b>How it works?</b>에서 집중(White) 사이트와 방해(Black) 사이트를 추가해 보세요!"
+    },
+    "onboardingClose": {
+        "message": "시작하기"
+    },
+    "howToUseTitle": {
+        "message": "이용 방법 (How to use)"
+    },
+    "howToUseDesc": {
+        "message": "• <b>집계 방식</b>: 현재 활성화된(보고 있는) 탭의 도메인을 기준으로 1분마다 시간을 측정합니다.<br>• <b>블랙/화이트 리스트</b>: 전체 URL(예: https://youtube.com/watch)을 입력해도 자동으로 도메인을 추출하여 하위 경로까지 모두 적용됩니다.<br>• <b>자동 렌더링</b>: 활성화 상태(Disable 버튼 표시)라면 모든 페이지 우측 하단에 펫이 나타납니다."
+    },
+    "permissionTitle": {
+        "message": "모든 사이트에서 활성화"
+    },
+    "permissionDesc": {
+        "message": "어느 사이트에서든 당신의 펫을 보여줍니다"
+    }
+}

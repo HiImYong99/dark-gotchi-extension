@@ -1,0 +1,36 @@
+export const CATEGORIES = {
+  ENTERTAINMENT: 'ENTERTAINMENT',
+  SOCIAL: 'SOCIAL',
+  SHOPPING: 'SHOPPING',
+  PRODUCTIVE: 'PRODUCTIVE',
+  UNKNOWN: 'UNKNOWN'
+};
+
+export const DOMAIN_MAPPING = {
+  'youtube.com': CATEGORIES.ENTERTAINMENT,
+  'netflix.com': CATEGORIES.ENTERTAINMENT,
+  'instagram.com': CATEGORIES.SOCIAL,
+  'twitter.com': CATEGORIES.SOCIAL,
+  'x.com': CATEGORIES.SOCIAL,
+  'facebook.com': CATEGORIES.SOCIAL,
+  'coupang.com': CATEGORIES.SHOPPING,
+  'amazon.com': CATEGORIES.SHOPPING,
+  'github.com': CATEGORIES.PRODUCTIVE,
+  'notion.so': CATEGORIES.PRODUCTIVE,
+  'docs.google.com': CATEGORIES.PRODUCTIVE
+};
+
+export const EVOLUTION_THRESHOLDS = {
+  ENTERTAINMENT: 100 * 60, // 100 minutes (20 stages of 5 mins)
+  SOCIAL: 100 * 60,
+  SHOPPING: 100 * 60,
+  PRODUCTIVE: 15 * 60
+};
+
+export const PET_STATES = {
+  NORMAL: 'NORMAL',
+  FAT: 'FAT',
+  ARROGANT: 'ARROGANT',
+  BEGGAR: 'BEGGAR',
+  WORKING: 'WORKING'
+};
