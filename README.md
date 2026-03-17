@@ -1,65 +1,82 @@
-# 👾 Dark-gotchi (다크고치)
+# Dark-gotchi
 
-**Dark-gotchi** is a browser extension that features a pixel-art pet that lives on your screen and reacts to your browsing habits. Support the developer to unlock special pet skins!
+**Dark-gotchi**는 사용자의 브라우징 습관에 반응하는 **픽셀 펫 크롬 확장 프로그램**입니다.
 
-**다크고치**는 사용자의 브라우징 습관에 따라 반응하는 도트 캐릭터 펫을 브라우저 화면에 띄워주는 크롬 확장 프로그램입니다. 후원을 통해 다양한 동물 스킨을 해제할 수 있습니다.
+한 줄로 말하면,
+**웹서핑을 오래 하거나 게을러질수록 펫의 상태와 태도가 바뀌는 도트 캐릭터 확장앱**입니다.
 
----
+## What it is
 
-## ✨ Features (주요 기능)
+- 웹페이지 하단에 픽셀 펫이 등장함
+- 사용자의 브라우징 패턴에 따라 상태가 변함
+- 클릭하면 현재 활동에 대한 반응/멘트를 보여줌
+- 후원 코드로 스킨을 해제할 수 있음
 
-### 🐾 Pixel Art Pets (도트 캐릭터)
-- **Interactive Pet**: A cute pet that appears at the bottom of every website.
-- **Dynamic States**: The pet's appearance and messages change based on your browsing time (NORMAL, FAT, ARROGANT, etc.).
-- **Click Interaction**: Click the pet to see what it thinks about your current web activity!
+## Core Features
 
-### 🌍 Multi-language Support (다국어 지원)
-- **Automatic Detection**: Supports both **English** and **Korean** based on your browser settings.
-- **Localized Content**: All UI labels and pet dialogues are fully translated.
+- 🐾 픽셀 펫 오버레이
+- 😈 사용 습관 기반 상태 변화
+- 🗯️ 상호작용형 멘트/반응
+- 🌍 한국어/영어 다국어 지원
+- 🎁 후원 기반 스킨 언락 시스템
 
-### 🎁 Supporter Rewards (후원 보상)
-- **Skin System**: Support the developer via **Buy Me a Coffee** to receive a code.
-- **Unlockable Pets**: Use the code to unlock adorable skins:
-  - 🐱 **Cat**: Pink ears and cute expressions.
-  - 🐕 **Doge**: The iconic Shiba Inu vibe.
-  - 🐹 **Hamster**: Chubby cheeks and tiny paws.
+## Why this project matters
 
----
+이 프로젝트는 단순 확장앱이 아니라,
+**생산성·습관·캐릭터성을 결합한 브라우저 위의 작은 동반자**를 실험하는 프로젝트입니다.
 
-## 🛠 Technology Stack (기술 스택)
+즉,
+- 재미 요소
+- 습관 피드백
+- 캐릭터 애착
+- 소액 후원형 수익화
 
-- **Frontend**: HTML5, CSS3, JavaScript (Vanilla JS).
-- **Extension API**: Manifest V3, Content Scripts, Background Service Workers, Storage API, i18n API.
-- **Graphics**: Custom hand-drawn SVGs (Pixel art style).
-- **Monetization**: External donation model (Buy Me a Coffee).
+이 네 가지를 같이 테스트합니다.
 
----
+## Tech Stack
 
-## 🚀 Installation (로드 방법)
+- JavaScript (Vanilla)
+- Chrome Extension Manifest V3
+- Content Scripts
+- Background Service Worker
+- Storage API
+- i18n API
 
-1. Open Chrome and go to `chrome://extensions/`.
-2. Enable **Developer mode** in the top right.
-3. Click **Load unpacked** and select the `dark-gotchi` folder.
-4. Happy browsing with your new pet!
+## Status
 
-## 🤝 Contribution & Support
+**MVP / Active**
 
-If you enjoy using Dark-gotchi, consider buying me a coffee!
-- **Support Link**: [buymeacoffee.com/yong9](https://buymeacoffee.com/yong9)
+현재는 컨셉과 상호작용 경험을 검증하는 단계입니다.
 
----
+## Installation
 
-### Project Structure (프로젝트 구조)
+1. Chrome에서 `chrome://extensions/` 열기
+2. 우측 상단 **개발자 모드** 켜기
+3. **압축해제된 확장 프로그램 로드** 클릭
+4. `dark-gotchi` 폴더 선택
+
+## Monetization Idea
+
+- 기본 펫 무료 제공
+- 후원 코드 입력 시 추가 스킨 해제
+- 장기적으로는 스킨/반응팩/통계 기능 확장 가능
+
+## Project Structure
 
 ```text
 dark-gotchi/
-├── _locales/           # Localization files (en, ko)
+├── _locales/
 ├── assets/
-│   ├── icons/          # Extension icons
-│   └── pets/           # Pixel art SVGs for each state/skin
-├── background/         # Background service worker logic
-├── content/            # Script to render pet on web pages
-├── lib/                # Crypto & utility libraries
-├── popup/              # Extension UI (HTML, CSS, JS)
-└── manifest.json       # Extension configuration
+├── background/
+├── content/
+├── lib/
+├── popup/
+└── manifest.json
 ```
+
+## Next Steps
+
+- 감정/상태 전환 로직 개선
+- 펫 반응 다양화
+- 후원 코드 UX 개선
+- 사용자 유지 포인트 검증
