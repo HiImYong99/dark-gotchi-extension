@@ -39,20 +39,10 @@ function copyRecursiveSync(src, dest) {
 }
 
 function minifyJS(src, dest) {
-    let content = fs.readFileSync(src, 'utf8');
-    // Simple minification: remove comments and whitespace
-    // Note: This is a very naive regex minifier. For production, use Terser.
-    // Removing single line comments // ...
-    content = content.replace(/\/\/[^\n]*/g, '');
-    // Removing multi line comments /* ... */
-    content = content.replace(/\/\*[\s\S]*?\*\//g, '');
-    // Remove empty lines
-    content = content.replace(/^\s*[\r\n]/gm, '');
-
-    // We keep newlines to avoid breaking ASI (Automatic Semicolon Insertion) if code is sloppy,
-    // but strict minifiers remove them. We'll be safe and just trim.
-
-    fs.writeFileSync(dest, content);
+    // Regex-based comment removal breaks URLs inside string literals
+    // (e.g. "http://*/*" — the /* and */ are misread as comment delimiters).
+    // Copy JS files as-is; use a proper tool like Terser if minification is needed.
+    fs.copyFileSync(src, dest);
 }
 
 function minifyCSS(src, dest) {

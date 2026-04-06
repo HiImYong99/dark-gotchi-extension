@@ -13,7 +13,7 @@
     <header>
       <h1 class="logo">Browser-Pet</h1>
       <div class="header-actions">
-        <button id="summon-btn" class="summon-btn" title="Bring Pet here">🐾 Join Me</button>
+        <button id="summon-btn" class="summon-btn" title="Toggle Pet">🐾 Disable</button>
         <div class="status-badge">
           <span class="status-dot"></span>
           <span id="state-text">HEALTHY</span>
@@ -76,7 +76,7 @@
 
       <section class="guide-section">
         <div class="guide-toggle" id="guide-toggle">
-          <span>How it works?</span>
+          <span data-i18n="howItWorksToggle">How it works?</span>
           <span class="chevron">▾</span>
         </div>
         <div id="guide-content" class="guide-content hidden">
@@ -96,10 +96,25 @@
             <h5 class="black-tag">Black Sites (Curses Pet)</h5>
             <div id="black-list" class="domain-tag-cloud"></div>
           </div>
+
+          <div class="how-to-use-section">
+            <h4 data-i18n="howToUseTitle">How to use</h4>
+            <p data-i18n="howToUseDesc" class="how-to-use-desc"></p>
+          </div>
         </div>
       </section>
     </main>
   </div>
+
+  <!-- Onboarding Modal -->
+  <div id="onboarding-modal" class="modal hidden">
+    <div class="modal-content">
+      <h2 data-i18n="onboardingTitle">Welcome!</h2>
+      <p data-i18n="onboardingDesc">Description</p>
+      <button id="onboarding-close-btn" data-i18n="onboardingClose">Get Started</button>
+    </div>
+  </div>
+
   <script src="popup.js" type="module"></script>
 </body>
 </html>

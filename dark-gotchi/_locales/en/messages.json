@@ -1,6 +1,6 @@
 {
     "extensionName": {
-        "message": "Dark-gotchi"
+        "message": "Browser-Pet"
     },
     "extensionDescription": {
         "message": "A pixel pet that evolves based on your browsing habits."
@@ -66,7 +66,7 @@
         "message": "Hi!"
     },
     "petFat": {
-        "message": "Popcorn!"
+        "message": "Stop eating!"
     },
     "petArrogant": {
         "message": "Get a life"
@@ -75,18 +75,21 @@
         "message": "Check balance?"
     },
     "onboardingTitle": {
-        "message": "Welcome to Dark-gotchi! 🎉"
+        "message": "Welcome to Browser-Pet! 🎉"
     },
     "onboardingDesc": {
-        "message": "Dark-gotchi reflects your browsing habits. Try adding productive (White) and distracting (Black) sites in the <b>How it works?</b> section below!"
+        "message": "Browser-Pet reflects your browsing habits. Try adding productive (White) and distracting (Black) sites in the <b>How it works?</b> section below!"
     },
     "onboardingClose": {
         "message": "Get Started"
+    },
+    "howItWorksToggle": {
+        "message": "How it works?"
     },
     "howToUseTitle": {
         "message": "How to use"
     },
     "howToUseDesc": {
-        "message": "• <b>Tracking</b>: Time is measured every minute based on the currently active (focused) tab's domain.<br>• <b>Black/White Lists</b>: You can input full URLs (e.g., https://youtube.com/watch) and it will automatically extract the domain to match all sub-paths.<br>• <b>Auto Rendering</b>: If enabled (showing 'Disable' button), the pet will appear at the bottom right of all pages."
+        "message": "• <b>Tracking</b>: Time is measured every minute based on the currently active (focused) tab's domain.<br>• <b>Black/White Lists</b>: You can input full URLs (e.g., https://youtube.com/watch) and it will automatically extract the domain.<br>• <b>Auto Rendering</b>: If enabled (showing 'Disable' button), the pet will appear at the bottom right of all pages."
     }
 }

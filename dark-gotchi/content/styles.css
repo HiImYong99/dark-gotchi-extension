@@ -1,14 +1,12 @@
 :host {
   all: initial;
   /* Reset everything */
-  z-index: 2147483647;
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  pointer-events: none;
-  /* Let clicks pass through container */
-  font-family: 'Courier New', Courier, monospace;
-  /* Pixel art vibe */
+  z-index: 2147483647 !important;
+  position: fixed !important;
+  bottom: 20px !important;
+  right: 20px !important;
+  pointer-events: none !important;
+  font-family: 'Courier New', Courier, monospace !important;
 }
 
 #pet-container {
@@ -30,17 +28,9 @@
   transition: width 0.5s ease-in-out, height 0.5s ease-in-out, transform 0.3s ease;
 }
 
-/* Evolution States */
+/* Evolution States - specific filters or effects can be added here */
 .state-fat .pet-image {
-  transform: scale(1.5);
-}
-
-.state-arrogant .pet-image {
-  /* Sunglasses logic usually involves separate element or different image */
-}
-
-.state-beggar .pet-image {
-  /* Can logic */
+  transform: scale(1.5) !important;
 }
 
 .speech-bubble {

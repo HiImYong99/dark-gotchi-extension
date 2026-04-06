@@ -77,9 +77,12 @@ chrome.storage.onChanged.addListener((changes, area) => {
             needsRender = true;
         }
         if (needsRender && currentStats) {
-            const container = document.getElementById(HOST_ID)?.shadowRoot?.getElementById('pet-container');
-            if (container) {
-                requestAnimationFrame(() => updatePetVisual(container, currentStats));
+            const host = document.getElementById(HOST_ID);
+            if (host && host.shadowRoot) {
+                const container = host.shadowRoot.getElementById('pet-container');
+                if (container) {
+                    requestAnimationFrame(() => updatePetVisual(container, currentStats));
+                }
             }
         }
     }
@@ -99,6 +102,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         } else if (!document.getElementById(HOST_ID)) {
             initPet();
         }
+    } else if (message.action === 'GET_DOMAIN') {
+        sendResponse({ domain: window.location.hostname });
     }
 });
 

@@ -5,6 +5,7 @@ export const CATEGORIES = {
   PRODUCTIVE: 'PRODUCTIVE',
   UNKNOWN: 'UNKNOWN'
 };
+
 export const DOMAIN_MAPPING = {
   'youtube.com': CATEGORIES.ENTERTAINMENT,
   'netflix.com': CATEGORIES.ENTERTAINMENT,
@@ -18,12 +19,14 @@ export const DOMAIN_MAPPING = {
   'notion.so': CATEGORIES.PRODUCTIVE,
   'docs.google.com': CATEGORIES.PRODUCTIVE
 };
+
 export const EVOLUTION_THRESHOLDS = {
-  ENTERTAINMENT: 100 * 60, 
+  ENTERTAINMENT: 100 * 60, // 100 minutes (20 stages of 5 mins)
   SOCIAL: 100 * 60,
   SHOPPING: 100 * 60,
   PRODUCTIVE: 15 * 60
 };
+
 export const PET_STATES = {
   NORMAL: 'NORMAL',
   FAT: 'FAT',

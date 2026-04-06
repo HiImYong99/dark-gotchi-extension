@@ -1,6 +1,10 @@
 import { CATEGORIES, DOMAIN_MAPPING, EVOLUTION_THRESHOLDS, PET_STATES } from './constants.js';
+import { getCategory } from '../lib/url_matcher.js';
+
 const ALARM_NAME = 'tracking_alarm';
-chrome.runtime.onInstalled.addListener(() => {
+
+// Initialize storage on install
+chrome.runtime.onInstalled.addListener(async () => {
   chrome.storage.local.get(['user_stats', 'settings', 'pet_profile', 'item_state'], (result) => {
     if (!result.user_stats) {
       const initialStats = {
@@ -14,23 +18,44 @@ chrome.runtime.onInstalled.addListener(() => {
           [CATEGORIES.SHOPPING]: 0,
           [CATEGORIES.PRODUCTIVE]: 0
         },
-        top_distractions: {} 
+        top_distractions: {} // Track counts per domain
       };
       chrome.storage.local.set({ user_stats: initialStats });
     }
+
+    // Updated Settings Schema
     if (!result.settings) {
       chrome.storage.local.set({
         settings: {
           is_pro: false,
           license_key: "",
           custom_insults: [],
-          selected_skin: "white_blob"
+          selected_skin: "white_blob",
+          is_enabled: true,
+          has_seen_onboarding: false
         }
       });
-    } else if (!result.settings.selected_skin) {
-      const newSettings = { ...result.settings, selected_skin: "white_blob" };
-      chrome.storage.local.set({ settings: newSettings });
+    } else {
+      // Migration for existing users (if any)
+      let needsUpdate = false;
+      const newSettings = { ...result.settings };
+      if (newSettings.selected_skin === undefined) {
+        newSettings.selected_skin = "white_blob";
+        needsUpdate = true;
+      }
+      if (newSettings.is_enabled === undefined) {
+        newSettings.is_enabled = true;
+        needsUpdate = true;
+      }
+      if (newSettings.has_seen_onboarding === undefined) {
+        newSettings.has_seen_onboarding = false;
+        needsUpdate = true;
+      }
+      if (needsUpdate) {
+        chrome.storage.local.set({ settings: newSettings });
+      }
     }
+
     if (!result.pet_profile) {
       chrome.storage.local.set({
         pet_profile: {
@@ -40,6 +65,8 @@ chrome.runtime.onInstalled.addListener(() => {
         }
       });
     }
+
+    // New Item State Schema
     if (!result.item_state) {
       chrome.storage.local.set({
         item_state: {
@@ -48,21 +75,39 @@ chrome.runtime.onInstalled.addListener(() => {
         }
       });
     }
+
+    // Initialize Dynamic Domain Mapping
     if (!result.domain_mapping) {
       chrome.storage.local.set({ domain_mapping: DOMAIN_MAPPING });
     }
   });
+
+  // Create alarm
   chrome.alarms.create(ALARM_NAME, { periodInMinutes: 1 });
-});
-function getCategory(domain, mapping) {
-  if (!domain || !mapping) return CATEGORIES.UNKNOWN;
-  for (const [key, category] of Object.entries(mapping)) {
-    if (domain.includes(key)) {
-      return category;
+
+  // Inject content scripts into existing tabs
+  try {
+    const tabs = await chrome.tabs.query({ url: ["http://*/*", "https://*/*"] });
+    for (const tab of tabs) {
+      try {
+        await chrome.scripting.insertCSS({
+          target: { tabId: tab.id },
+          files: ['content/styles.css']
+        });
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['content/content.js']
+        });
+      } catch (err) {
+        // Skip restricted tabs
+      }
     }
+  } catch (err) {
+    // Ignore query errors
   }
-  return CATEGORIES.UNKNOWN;
-}
+});
+
+// Track active tab updates
 async function updateCurrentDomain() {
   try {
     const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
@@ -71,6 +116,8 @@ async function updateCurrentDomain() {
       try {
         const url = new URL(tab.url);
         const domain = url.hostname;
+
+        // Update storage
         const result = await chrome.storage.local.get('user_stats');
         if (result.user_stats) {
           const stats = result.user_stats;
@@ -79,27 +126,37 @@ async function updateCurrentDomain() {
           await chrome.storage.local.set({ user_stats: stats });
         }
       } catch (e) {
+        // Invalid URL, ignore
       }
     }
   } catch (e) {
     console.error("Error getting active tab:", e);
   }
 }
+
 chrome.tabs.onActivated.addListener(updateCurrentDomain);
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.active) {
-    updateCurrentDomain();
+chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+  if (changeInfo.status === 'complete') {
+    if (tab.active) {
+      updateCurrentDomain();
+    }
   }
 });
+
+// Alarm handler
 chrome.alarms.onAlarm.addListener(async (alarm) => {
   if (alarm.name === ALARM_NAME) {
+    // Fetch pet_profile as well for daily reset logic
     const result = await chrome.storage.local.get(['user_stats', 'item_state', 'pet_profile', 'domain_mapping']);
     if (!result.user_stats) return;
+
     const mapping = result.domain_mapping || DOMAIN_MAPPING;
     const stats = result.user_stats;
     let itemState = result.item_state || { shield_active: false, shield_expiry: 0 };
     let petProfile = result.pet_profile || { shield_used_today: false };
     const now = Date.now();
+
+    // Check Day Reset (Shield Daily Limit) based on last update time vs now
     const lastDate = new Date(stats.last_update);
     const currentDate = new Date(now);
     if (lastDate.getDate() !== currentDate.getDate() || lastDate.getMonth() !== currentDate.getMonth()) {
@@ -108,15 +165,21 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         await chrome.storage.local.set({ pet_profile: petProfile });
       }
     }
+
+    // Check Shield Expiry
     if (itemState.shield_active && itemState.shield_expiry < now) {
       itemState.shield_active = false;
       await chrome.storage.local.set({ item_state: itemState });
     }
+
+    // Check for time jump
     if (now - stats.last_update > 60 * 60 * 1000) {
       stats.last_update = now;
       await chrome.storage.local.set({ user_stats: stats });
       return;
     }
+
+    // Determine category of current domain
     const tabs = await chrome.tabs.query({ active: true, lastFocusedWindow: true });
     const tab = tabs[0];
     let currentDomain = "";
@@ -125,8 +188,11 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         currentDomain = new URL(tab.url).hostname;
       } catch (e) { }
     }
+
     stats.current_domain = currentDomain;
     const category = getCategory(currentDomain, mapping);
+
+    // Ensure category_times exists
     if (!stats.category_times) {
       stats.category_times = {
         [CATEGORIES.ENTERTAINMENT]: 0,
@@ -135,13 +201,16 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         [CATEGORIES.PRODUCTIVE]: 0
       };
     }
+
     let increment = 60;
     if (itemState.shield_active && [CATEGORIES.ENTERTAINMENT, CATEGORIES.SOCIAL, CATEGORIES.SHOPPING].includes(category)) {
       increment = 30;
     }
+
     if (category !== CATEGORIES.UNKNOWN && stats.category_times[category] !== undefined) {
       stats.category_times[category] += increment;
     }
+
     if ([CATEGORIES.ENTERTAINMENT, CATEGORIES.SOCIAL, CATEGORIES.SHOPPING].includes(category)) {
       stats.total_distraction_time += 60;
       if (currentDomain) {
@@ -149,6 +218,8 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         stats.top_distractions[currentDomain] = (stats.top_distractions[currentDomain] || 0) + 1;
       }
     }
+
+    // Evolution Logic
     if (stats.category_times[CATEGORIES.PRODUCTIVE] >= EVOLUTION_THRESHOLDS.PRODUCTIVE) {
       stats.current_state = PET_STATES.NORMAL;
       stats.category_times[CATEGORIES.ENTERTAINMENT] = 0;
@@ -164,13 +235,14 @@ chrome.alarms.onAlarm.addListener(async (alarm) => {
         stats.current_state = PET_STATES.BEGGAR;
       }
     }
+
     stats.last_update = now;
     await chrome.storage.local.set({ user_stats: stats });
+
     chrome.runtime.sendMessage({
       action: 'STATE_UPDATE',
       state: stats.current_state,
       stats: stats
-    }).catch((err) => {
-    });
+    }).catch(() => { });
   }
 });
